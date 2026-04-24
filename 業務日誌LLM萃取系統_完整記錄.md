@@ -1,7 +1,7 @@
 # 業務日誌 LLM 智慧萃取系統 — 完整規劃與執行記錄
 
-> 版本 v4.5（規劃書 v4.4 + Phase L 執行紀錄）　2026 年 4 月（最後更新 2026-04-20）
-> 百萬篇日報 → 零人工 L 分類 → 分層聚類 → Map 歸納 → 熱路徑 → 三輸出邏輯
+> 版本 v4.6（+ Phase M/1 完成 + Phase 2 執行中 + 商機等級架構釐清）　2026 年 4 月（最後更新 2026-04-24）
+> 百萬篇日報 → 零人工 L 分類 → 分層聚類 → 商機等級（E/D/C2/C1/B/A）→ 痛需熱圖 → 三輸出邏輯
 
 ---
 
@@ -24,15 +24,13 @@
 
 | 模組 | 現況 | 成熟度 |
 |------|------|--------|
-| 內容標籤 ipynb | 已完成（行業/場景/議題/產品/深度） | ✅ 可用 |
-| 商機等級 ipynb | 已完成 | ✅ 可用 |
-| Map 雛形（Map0330） | 已有 664條L1 / 1344條L2 / 556條L3 | 有雛形 |
-| L1–L7 零人工分類 pipeline | Step 0/1/2/3 全部 ✅；phase_l_final.csv 1,802,590 筆已輸出 | ✅ 完成 |
-| 百萬篇分層聚類 pipeline | L-PhaseM分層聚類.ipynb 已建立（KMeans + PCA + 熱路徑） | ⬜ 待執行 |
-| 熱路徑自動管理機制 | v4.0 設計 | ⬜ 待建立 |
-| 法人歷程標籤 ipynb | 8大類標籤；多執行緒 B2 執行中（469 家已完成，RESUME=True） | 🔄 執行中 |
-| 痛需累積表 + 推方案 | 尚未建立 | ⬜ 待開發 |
-| 問卷 Adapter（82,105 筆） | ✅ 完成（survey_signals.jsonl 407 MB，survey_by_company.csv 5 MB） | ✅ 完成 |
+| Phase 0 問卷 Adapter | ✅ 完成（survey_signals.jsonl 407 MB，survey_by_company.csv 5 MB，82,105 筆） | ✅ 完成 |
+| Phase L 零人工分類 pipeline | ✅ 完成（Step 0/1/2/3；phase_l_final.csv 1,802,590 筆） | ✅ 完成 |
+| Phase 1 法人歷程標籤 | ✅ 完成（206,817 家，8 大類屬性，company_labels_flat.csv） | ✅ 完成 |
+| Phase M 分層聚類 | ✅ 完成（KMeans k=7 + PCA + 熱路徑；7 種法人類型） | ✅ 完成 |
+| Phase 2 深度標籤 | 🔄 執行中 6.8%（L1–L7 全層，Gemini 2.0 Flash，6 Workers，RESUME=True） | 🔄 執行中 |
+| 商機等級（E/D/C2/C1/B/A） | 測試 1,000 筆 ✅；主流程待全量執行（756,989 筆 LeadInfo） | 🔄 待全量 |
+| Phase 3 痛需熱圖 | 架構設計完成（Phase 2 × 商機等級 × PhaseM 聚類三維合併） | ⬜ 待建立 |
 
 ---
 
@@ -476,38 +474,84 @@ S1（匯入套件）→ S2（載入設定 & 連線）→ S3（初始化 Vertex A
 
 ## 九、後續各 Phase 規劃
 
-### Phase M：分層聚類 + Map 歸納 + 熱路徑
+### Phase M：分層聚類 + Map 歸納 + 熱路徑 ✅ 完成（2026-04-23）
 
 | 項目 | 說明 |
 |------|------|
-| 主要 Notebook | `L-PhaseM分層聚類.ipynb`（2026-04-20 建立） |
-| 輸入 | `company_labels.jsonl`（法人標籤）+ `phase_l_final.csv` |
-| 方法 | KMeans(k=7) + PCA 2D + 公司 L 層時序熱路徑 |
-| 狀態 | ⬜ 待執行（Notebook 已建立，法人標籤執行完後跑） |
-| 輸出 | `phaseM_output/company_clusters.csv`、`cluster_profiles.csv`、`hotpaths.csv` |
+| 主要 Notebook | `L-PhaseM分層聚類.ipynb` |
+| 方法 | KMeans(k=7) + StandardScaler + PCA(n=2) + compress_path() 熱路徑 |
+| 狀態 | ✅ 完成 |
+| 輸出 | `results/phaseM/company_clusters.csv`、`cluster_profiles.csv`、`hotpaths.csv` |
 
-**Notebook Cell 結構：**
-- A1：解析 company_labels.jsonl → 15 個數值特徵
-- A2：載入 phase_l_final.csv（1,802,590 筆）
-- B1：StandardScaler 標準化
-- B2：KMeans(k=7) 分群
-- B3：PCA(n=2) 降維 → Map 座標
-- C1：公司 L 層時序路徑（壓縮相鄰重複）
-- C2：Top-30 熱路徑統計
-- E1：各群特徵側寫報告
-- E2：輸出三個 CSV
+**7 群法人類型：**
 
-### Phase 1：法人歷程標籤（與 Phase L 並行）
+| Cluster | 名稱 | 家數 | 特徵 |
+|---------|------|------|------|
+| C0 | 微型內銷 | 141,323 | 所有維度最低，純本土小型企業 |
+| C1 | 標準內銷 | 38,247 | 員工 83 人，中小規模製造 |
+| C2 | 大型外商 | 11,284 | 員工 993 人，22.6% 外資 |
+| C3 | 多面型強者 | 5,621 | 外商 29%+家族 31%，貿易國最多 |
+| C4 | 品牌驅動 | 4,133 | 品牌數最高（2.86），強品牌意識 |
+| C5 | 家族外銷 | 3,872 | 家族 99.9%，外銷製造為主 |
+| C6 | 外資貿易 | 2,337 | 外商 99.1%，貿易國最廣 |
 
-- S1（Haiku）：外商/家族/員工數/商業模式/集團/進出口
-- S2（Sonnet）：客戶/供應商/競爭者
-- S3（Sonnet）：各 L 層銷售進度 + 關注議題
+**Top-3 熱路徑：** L2→L1（3.97%）、L1→L2（2.73%）、L5→L1（2.66%）
 
-### Phase 3：痛需累積表 + 三輸出邏輯
+---
 
-痛需累積表欄位：`legal_entity_id`、`l_layer`、`cluster_id/pain_id`、`frequency/recency_score`、`heat_path_flag`、`survey_pain_flag`
+### Phase 1：法人歷程標籤 ✅ 完成（2026-04-23）
 
-三輸出：① 推薦業務問項　② 推薦開發方案卡（heat_score ≥ 0.5）　③ 推方案/機會卡
+| 項目 | 說明 |
+|------|------|
+| 模型 | Gemini 2.0 Flash（TEMP=0.1，RPM=30） |
+| 完成數 | 206,817 家 |
+| 輸出 | `results/phase1/company_labels_flat.csv` |
+
+---
+
+### Phase 2：深度標籤（執行中）
+
+| 項目 | 說明 |
+|------|------|
+| 進度 | 🔄 6.8%（~12,159 家）|
+| 方法 | 每篇日報 × L1–L7 × 3 欄位，Gemini 2.0 Flash，6 Workers |
+| 輸出 | `results/phase2/phase2_deep_labels.jsonl` |
+
+---
+
+### 商機等級（E/D/C2/C1/B/A）— 待全量執行
+
+**架構釐清（2026-04-24）：**
+- 商機等級 ≠ L1–L7；兩者是**不同維度**
+- L1–L7：每篇日報在**討論什麼**（痛點/角色/目標/議題/評估/方向/成果）
+- 商機等級：這筆 Lead **走到銷售漏斗哪一步**（E潛客→D痛點→C2共識→C1立案→B定案→A決案）
+
+**痛需熱圖 = L1–L7（Y 軸）× 商機等級（顏色溫度）× 法人類型（分群）**
+
+| 項目 | 說明 |
+|------|------|
+| 資料來源 | `CRMGY`（756,989 筆 LeadInfo） |
+| 現況 | 測試 1,000 筆 ✅；主流程 cell 已建立，待執行 |
+| 輸出 | `D:\yujui\痛點需求地圖\lead_stage_results.csv` |
+| 斷點續傳 | `lead_stage_progress.json` |
+
+---
+
+### Phase 3：痛需熱圖 + 三輸出邏輯（待建立）
+
+**輸入三路合流：**
+```
+Phase 2 輸出（L1-L7 深度標籤）   ← 痛什麼、需要什麼
+商機等級（E/D/C2/C1/B/A）        ← 走到哪一步（商機溫度）
+Phase M 聚類（法人類型 C0–C6）   ← 哪種公司
+        ↓ JOIN by company_id
+痛需熱圖：法人類型 × L1痛點類型，顏色 = B+A 比例（高溫商機）
+```
+
+**三輸出：**
+① 推薦業務問項（空白議題補問）
+② 推薦開發方案卡（heat_score ≥ 0.5）
+③ 推方案/機會卡（B+A 階段高密度法人類型）
 
 ---
 
@@ -549,45 +593,47 @@ L 層權重：L7=3.0 / L5-L6=2.0 / L3-L4=1.5 / L1-L2=1.0
 
 ## 十二、時程規劃
 
-### 12.1 Phase 進度總覽（2026-04-20）
+### 12.1 Phase 進度總覽（2026-04-24）
 
 | Phase | 工作項目 | 工期 | 狀態 |
 |-------|---------|------|------|
 | Phase 0 | GCP 架構 ✅ + 問卷 Adapter ✅（survey_signals 407MB）| W1–W2 | ✅ 完成 |
-| **Phase L** | **Step 0/1/2/3 全部 ✅；phase_l_final.csv 1,802,590 筆** | **W3–W4** | **✅ 完成** |
-| Phase M | 分層聚類 + Map + 熱路徑（Notebook 已建立） | W5 | ⬜ 待執行 |
-| Phase 1 | 法人歷程標籤（執行中，469/全量，RESUME=True） | W3–W5 | 🔄 執行中 |
-| Phase 2 | L1–L7 深度標籤（摘要可選，非必要） | W6–W7 | ⬜ |
-| Phase 3 | 痛需累積表 + 三輸出邏輯 | W8–W10 | ⬜ |
+| Phase L | Step 0/1/2/3 全部 ✅；phase_l_final.csv 1,802,590 筆 | W3–W4 | ✅ 完成 |
+| Phase 1 | 法人歷程標籤 ✅ 完成（206,817 家，8 大類） | W3–W5 | ✅ 完成 |
+| Phase M | 分層聚類 + PCA + 熱路徑 ✅（7 種法人類型） | W5 | ✅ 完成 |
+| **商機等級** | **LeadInfo 756,989 筆 E/D/C2/C1/B/A 判定** | **W5–W6** | **🔄 待全量** |
+| **Phase 2** | **L1–L7 深度標籤（6 Workers，RESUME=True）** | **W5–W7** | **🔄 執行中 6.8%** |
+| Phase 3 | 痛需熱圖 + 三輸出（需 Phase 2 + 商機等級 完成） | W8–W10 | ⬜ |
 | Phase 5 | 擴展新資料源（客服/會議/外部） | W11–W13 | ⬜ |
 
-### 12.2 甘特圖（v4.4，2026-04-20）
+### 12.2 甘特圖（v4.6，2026-04-24）
 
 ```
 任務                          4/01  4/08  4/15  4/22  4/29  5/06  5/13  5/20
 ─────────────────────────────────────────────────────────────────────────────
-Phase 0：GCP 架構              ████░░
-Phase 0：問卷 Adapter          ░░░░░░████░░░░▓▓
+Phase 0：GCP 架構              ████
+Phase 0：問卷 Adapter          ░░░░░░████
 Step 0：種子庫建立             ░░░░████
 Step 1：規則快篩               ░░░░░████
 Step 2：KNN 分類               ░░░░░░████████
-Step 3：SC 分類（14 筆）                         ████  ← ✅ 完成（1,802,590筆合併）
-Phase 1：法人歷程標籤          ░░░░░░░░████████▓▓▓▓
-Phase M：分層聚類+Map                                   ████
-Phase 3：痛需累積表+三輸出                                   ░░░░░░░░████████
+Step 3：SC 分類（14 筆）                   ██   ← ✅ 1,802,590 筆合併
+Phase 1：法人歷程標籤          ░░░░░░░░████████
+Phase M：分層聚類+Map                          ███  ← ✅ 7 種法人類型
+商機等級（全量 756k）                            ▓▓▓▓  ← 🔄 進行中（←你現在）
+Phase 2：深度標籤（178k家）                      ▓▓▓▓▓▓▓  ← 🔄 6.8%
+Phase 3：痛需熱圖+三輸出                                    ░░░░░░░░████████
 
-說明：████ 已完成  ░░ 進行中/執行中  ▓▓ 待執行（近期）
+說明：████ 已完成  ▓▓ 執行中/進行中  ░░ 待執行
 ```
 
-### 12.3 近期待辦（W4，2026-04-20 後）
+### 12.3 近期待辦（W5，2026-04-24）
 
 | 優先序 | 任務 | 狀態 |
 |--------|------|------|
-| ✅ | 問卷 Adapter 執行（survey_signals.jsonl 407MB） | 完成 |
-| P0 | Step 3 SC 分類（14 筆 MEDIUM，< 1 小時） | 待執行 |
-| P0 | 法人標籤 B2 全量跑完（RESUME=True） | 執行中 |
-| P1 | E1/E2 法人標籤覆蓋率報告 + CSV | 跑完後 |
-| P1 | Phase M 分層聚類啟動 | 下週 |
+| P0 | 商機等級全量跑完（756,989 筆，可與 Phase 2 並行） | 🔄 主流程已建立 |
+| P0 | Phase 2 繼續執行（RESUME=True，6 Workers） | 🔄 執行中 6.8% |
+| P1 | Phase 3 schema 設計（三維 JOIN 邏輯） | 兩者完成後 |
+| P2 | REPORT.html / 文件更新 | ✅ 已更新 |
 
 ---
 
@@ -636,4 +682,5 @@ conn = pyodbc.connect(
 | `L-Step3SC分類.ipynb` | Step 3 Self-Consistency LLM | 🔄 待執行（14 筆 MEDIUM） |
 | `L-問卷Adapter.ipynb` | Phase 0 問卷三大信號萃取 | 🔄 Code 完成，待執行 |
 | `法人標籤.ipynb` | 法人 8 大類屬性標注（多執行緒） | 🔄 執行中（469 家，RESUME=True） |
-| `商機等級.ipynb` | 商機等級分析 | ✅ 完成 |
+| `商機等級.ipynb` | LeadInfo 756,989 筆 E/D/C2/C1/B/A 判定（全量主流程已建立） | 🔄 待全量 |
+| `L-Phase2深度標籤.ipynb` | Phase 2 L1–L7 深度結構化標籤，6 Workers，RESUME=True | 🔄 執行中 6.8% |
