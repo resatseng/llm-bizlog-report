@@ -13,11 +13,20 @@
 # 一次性 patch 腳本
 _patch_gantt_done_color.py
 
-# 輸出資料（不入版本控制）
+# 超大原始輸出（不入版本控制）
 *_output/
-*.csv
-*.jsonl
 *.parquet
+
+# 超過 50MB 的大檔（用 Git LFS 或不上傳）
+step1_results.jsonl
+step2_results*.jsonl
+step2_vectors.parquet
+_a2_matched.jsonl
+phase_l_final.csv
+company_labels.jsonl
+seed_vectors.jsonl
+survey_signals.jsonl
+survey_labeled.jsonl
 
 # Python
 __pycache__/
