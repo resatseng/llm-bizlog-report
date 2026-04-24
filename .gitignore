@@ -1,0 +1,25 @@
+# 舊版本 / 暫存
+舊檔/
+~$*
+*.tmp
+
+# 大型二進位（PPT / Word / 鎖定檔）
+*.pptx
+*.docx
+
+# Claude 本地設定
+.claude/
+
+# 一次性 patch 腳本
+_patch_gantt_done_color.py
+
+# 輸出資料（不入版本控制）
+*_output/
+*.csv
+*.jsonl
+*.parquet
+
+# Python
+__pycache__/
+*.pyc
+.env
