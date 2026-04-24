@@ -86,8 +86,16 @@ tr:hover td{background:#1a2035}
 .radar-card .rc-footer{padding:8px 10px;font-size:.8em}
 .rc-name{color:#7dd3fc;font-weight:bold}
 .rc-count{color:#94a3b8;font-size:.78em}
+/* ── PCA filter bar ─────────────────── */
+.pca-filter-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:18px 0 10px;padding:10px 14px;background:#1a2035;border:1px solid #2d4a7a;border-radius:10px}
+.cf-label{color:#94a3b8;font-size:.82em;margin-right:4px}
+.cf-sep{color:#4a5568;margin:0 4px}
+.cf-ctrl{background:#1e2a3a;border:1px solid #4a5568;color:#94a3b8;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.8em;transition:all .15s}
+.cf-ctrl:hover{background:#2d3748;color:#e2e8f0}
+.cf-btn{background:#1e2a3a;border:2px solid var(--c);color:#94a3b8;padding:4px 11px;border-radius:6px;cursor:pointer;font-size:.8em;font-weight:bold;transition:all .15s;opacity:.45}
+.cf-btn.active{background:color-mix(in srgb,var(--c) 20%,#1a2035);color:var(--c);opacity:1;box-shadow:0 0 0 1px var(--c) inset}
 /* ── PCA container ──────────────────── */
-.pca-wrap{background:#1a2035;border:1px solid #2d4a7a;border-radius:12px;overflow:hidden;margin:24px 0}
+.pca-wrap{background:#1a2035;border:1px solid #2d4a7a;border-radius:12px;overflow:hidden;margin:0 0 24px}
 /* ── Lightbox ───────────────────────── */
 #lb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center;flex-direction:column}
 #lb-overlay.active{display:flex}
@@ -268,19 +276,63 @@ parts.append("""
   </ul>
 """)
 
-# PCA 互動圖
+# PCA 互動圖 + 篩選按鈕
+cluster_filter_buttons = ""
+for i, (color, name, count, desc) in enumerate(CLUSTER_INFO):
+    short = name.split()[0]  # "C0"
+    cluster_filter_buttons += f"""<button class="cf-btn active" data-idx="{i}" style="--c:{color}" onclick="toggleCluster({i},this)">{short}</button>"""
+
 parts.append(f"""
   <h3>PCA 散點圖 — 互動版（可縮放 / 拖曳 / Hover）</h3>
+  <div class="pca-filter-bar">
+    <span class="cf-label">篩選群組：</span>
+    <button class="cf-ctrl" onclick="selectAllClusters()">全選</button>
+    <button class="cf-ctrl" onclick="clearAllClusters()">全消</button>
+    <span class="cf-sep">|</span>
+    {cluster_filter_buttons}
+  </div>
   <div class="pca-wrap">
     <div id="pca-plot" style="width:100%;height:520px"></div>
   </div>
   <script>
   (function(){{
-    var data   = {plotly_json};
+    var plotlyData = {plotly_json};
     var config = {{responsive:true, displayModeBar:true,
                    modeBarButtonsToRemove:['select2d','lasso2d','autoScale2d'],
                    displaylogo:false}};
-    Plotly.newPlot('pca-plot', data.data, data.layout, config);
+    Plotly.newPlot('pca-plot', plotlyData.data, plotlyData.layout, config);
+
+    /* 篩選按鈕邏輯 ---------------------------------------- */
+    /* plotlyData.data 前 7 條是 scattergl（cluster 0-6），後面是標注 */
+    var N_CLUSTER = 7;
+    var visible = [true,true,true,true,true,true,true];
+
+    function applyVisibility(){{
+      /* cluster traces: indices 0~6; annotation traces 7~13 */
+      var vArr = visible.map(function(v){{return v ? true : 'legendonly';}});
+      var annoVArr = visible.map(function(v){{return v ? true : 'legendonly';}});
+      Plotly.restyle('pca-plot', {{visible: vArr}}, [...Array(N_CLUSTER).keys()]);
+      if(plotlyData.data.length > N_CLUSTER){{
+        Plotly.restyle('pca-plot', {{visible: annoVArr}},
+          [...Array(plotlyData.data.length - N_CLUSTER).keys()].map(function(k){{return k+N_CLUSTER;}}));
+      }}
+    }}
+
+    window.toggleCluster = function(idx, btn){{
+      visible[idx] = !visible[idx];
+      btn.classList.toggle('active', visible[idx]);
+      applyVisibility();
+    }};
+    window.selectAllClusters = function(){{
+      visible = visible.map(function(){{return true;}});
+      document.querySelectorAll('.cf-btn').forEach(function(b){{b.classList.add('active');}});
+      applyVisibility();
+    }};
+    window.clearAllClusters = function(){{
+      visible = visible.map(function(){{return false;}});
+      document.querySelectorAll('.cf-btn').forEach(function(b){{b.classList.remove('active');}});
+      applyVisibility();
+    }};
   }})();
   </script>
 """)
