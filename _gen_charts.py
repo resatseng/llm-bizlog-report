@@ -121,17 +121,6 @@ def draw_radar_single(cluster_id: int) -> pathlib.Path:
         tw2, th2 = bb2[2]-bb2[0], bb2[3]-bb2[1]
         draw.text((lx - tw2/2, ly - th/2 + th + 2), val_str, font=fnt_val, fill="#94a3b8")
 
-    # 標題（底部）
-    title = f"{CLUSTER_NAMES[cluster_id]}"
-    count_str = f"{CLUSTER_COUNTS.get(cluster_id, 0):,} 家"
-    bb_t = draw.textbbox((0,0), title, font=fnt_title)
-    tw_t = bb_t[2] - bb_t[0]
-    draw.text(((W - tw_t)//2, H - 56), title, font=fnt_title,
-              fill=color_hex)
-    bb_c = draw.textbbox((0,0), count_str, font=fnt_sub)
-    tw_c = bb_c[2] - bb_c[0]
-    draw.text(((W - tw_c)//2, H - 30), count_str, font=fnt_sub, fill="#94a3b8")
-
     # C0 特別標注
     if cluster_id == 0:
         note = "各維度均為最低基準群"
