@@ -150,7 +150,8 @@ parts.append("""
     <span class="badge green">1,802,590 筆日報已分類</span>
     <span class="badge green">206,817 家法人已標籤</span>
     <span class="badge blue">7 群聚類已完成</span>
-    <span class="badge yellow">Phase 2 執行中 6.8%</span>
+    <span class="badge yellow">Phase 2 執行中 40.5%</span>
+    <span class="badge yellow">商機等級執行中 2.0%</span>
     <span class="badge">Gemini 2.0 Flash</span>
     <span class="badge">sklearn KMeans + PCA</span>
   </div>
@@ -191,9 +192,12 @@ parts.append("""
   <div class="phase-card done"><span class="phase-tag tag-done">✅ 完成</span>
     <div class="phase-title">Phase M — 分層聚類 + 痛需地圖</div>
     <div class="phase-meta">KMeans(k=7) × PCA 視覺化 × Top-30 熱路徑，產出 7 種法人類型</div></div>
-  <div class="phase-card running"><span class="phase-tag tag-running">🔄 執行中 6.8%</span>
+  <div class="phase-card running"><span class="phase-tag tag-running">🔄 執行中 2.0%</span>
+    <div class="phase-title">商機等級 — LeadInfo 銷售漏斗（756,989 筆）</div>
+    <div class="phase-meta">三層 Pipeline：關鍵詞快篩（~70%）→ TF-IDF KNN k=5（~25%）→ Batch LLM 10筆/次（~5%），零 Embedding API</div></div>
+  <div class="phase-card running"><span class="phase-tag tag-running">🔄 執行中 40.5%</span>
     <div class="phase-title">Phase 2 — 日報深度標籤（L1–L7 結構化）</div>
-    <div class="phase-meta">每篇日報 × 7 層 × 3 欄位，~178,790 家公司，Gemini 2.0 Flash，6 Workers</div></div>
+    <div class="phase-meta">每篇日報 × 7 層 × 3 欄位，72,420 / ~178,790 行，Gemini 2.0 Flash，6 Workers，RESUME=True</div></div>
   <div class="phase-card pending"><span class="phase-tag tag-pending">⬜ 待建立</span>
     <div class="phase-title">Phase 3 — 痛需熱圖 + 三輸出</div>
     <div class="phase-meta">Phase 2 × 商機等級（E/D/C2/C1/B/A）× PhaseM 聚類 → 推薦問項 / 開發方案卡 / 機會卡</div></div>
@@ -394,10 +398,10 @@ parts.append("""
 <div class="section" id="phase2">
   <h2>Phase 2 — 日報深度標籤（執行中）</h2>
   <div class="stats-grid">
-    <div class="stat-box"><div class="stat-num">6.8%</div><div class="stat-label">當前進度</div></div>
+    <div class="stat-box"><div class="stat-num">40.5%</div><div class="stat-label">當前進度</div></div>
+    <div class="stat-box"><div class="stat-num">72,420</div><div class="stat-label">已完成行數</div></div>
     <div class="stat-box"><div class="stat-num">6</div><div class="stat-label">並發 Workers</div></div>
-    <div class="stat-box"><div class="stat-num">30 RPM</div><div class="stat-label">API 速率上限</div></div>
-    <div class="stat-box"><div class="stat-num">~178,790</div><div class="stat-label">目標法人數</div></div>
+    <div class="stat-box"><div class="stat-num">~178,790</div><div class="stat-label">目標行數</div></div>
   </div>
   <pre><code>RPM_LIMIT = <span class="nm">30</span>  |  N_WORKERS = <span class="nm">6</span>  |  RESUME = <span class="nm">True</span>
 
@@ -422,12 +426,13 @@ parts.append("""
     <tr><td>Phase L</td><td style="color:#10b981">✅ 完成</td><td>1,802,590 筆</td><td><code>results/phaseL/</code>（4 檔）</td></tr>
     <tr><td>Phase 1</td><td style="color:#10b981">✅ 完成</td><td>206,817 家</td><td><code>results/phase1/company_labels_flat.csv</code></td></tr>
     <tr><td>Phase M</td><td style="color:#10b981">✅ 完成</td><td>7 clusters</td><td><code>results/phaseM/</code>（PCA + 7 雷達 + CSV）</td></tr>
-    <tr><td>Phase 2</td><td style="color:#f59e0b">🔄 執行中</td><td>~6.8%</td><td><code>results/phase2/phase2_deep_labels.jsonl</code></td></tr>
+    <tr><td>商機等級</td><td style="color:#f59e0b">🔄 執行中</td><td>15,000 / 756,989（2.0%）</td><td><code>lead_stage_results.csv</code>（關鍵詞→TF-IDF KNN→Batch LLM）</td></tr>
+    <tr><td>Phase 2</td><td style="color:#f59e0b">🔄 執行中</td><td>72,420 / ~178,790（40.5%）</td><td><code>phase2_output/phase2_deep_labels.jsonl</code></td></tr>
     <tr><td>Phase 3</td><td style="color:#64748b">⬜ 待建立</td><td>—</td><td><code>L-Phase3痛需熱圖.ipynb</code>（schema 已設計）</td></tr>
   </table>
 </div>
 <footer>
-  <p>業務日誌 LLM 智慧萃取系統 &nbsp;｜&nbsp; 最後更新：2026-04-24</p>
+  <p>業務日誌 LLM 智慧萃取系統 &nbsp;｜&nbsp; 最後更新：2026-04-27</p>
   <p>Built with Gemini 2.0 Flash &nbsp;·&nbsp; sklearn KMeans + PCA &nbsp;·&nbsp; Plotly &nbsp;·&nbsp; Pillow</p>
 </footer>
 """)
