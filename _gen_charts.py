@@ -36,6 +36,9 @@ FEAT_COLS = ["f_foreign", "f_biz_model", "f_headcount", "f_n_trade_ctry",
              "f_n_competitor", "f_n_brand", "f_n_issues", "f_n_customer"]
 FEAT_LABELS = ["外商比例", "商業模式", "員工規模", "貿易國數",
                "競爭者數", "品牌數", "議題數", "客戶數"]
+# 對應單位；外商比例特殊處理（×100 → %）
+FEAT_UNITS  = ["%", "", "人", "國", "個", "個", "個", "個"]
+FEAT_PCT    = [True, False, False, False, False, False, False, False]  # 是否 ×100
 
 # 用 floor normalization（C0 可見）
 feat_vals = profiles[FEAT_COLS].values.astype(float)
@@ -114,9 +117,16 @@ def draw_radar_single(cluster_id: int) -> pathlib.Path:
         tw, th = bb[2]-bb[0], bb[3]-bb[1]
         draw.text((lx - tw/2, ly - th/2), label, font=fnt_lbl, fill="#7dd3fc")
 
-        # 數值
+        # 數值 + 單位
         raw_val = feat_vals[cluster_id][i]
-        val_str = f"{raw_val:.2f}" if raw_val < 100 else f"{raw_val:.0f}"
+        display_val = raw_val * 100 if FEAT_PCT[i] else raw_val
+        unit = FEAT_UNITS[i]
+        if FEAT_PCT[i]:
+            val_str = f"{display_val:.1f}{unit}"
+        elif display_val < 100:
+            val_str = f"{display_val:.2f}{unit}"
+        else:
+            val_str = f"{display_val:.0f}{unit}"
         bb2 = draw.textbbox((0,0), val_str, font=fnt_val)
         tw2, th2 = bb2[2]-bb2[0], bb2[3]-bb2[1]
         draw.text((lx - tw2/2, ly - th/2 + th + 2), val_str, font=fnt_val, fill="#94a3b8")
