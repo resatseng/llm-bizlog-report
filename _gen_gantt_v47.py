@@ -11,7 +11,7 @@ from openpyxl.utils import get_column_letter
 DST = r"d:\yujui\痛點需求地圖\prompt定版\LLM系統開發甘特圖_v4_7.xlsx"
 
 # ── 顏色 ──────────────────────────────────────────────────────────
-C_DONE    = "22C55E"   # 完成綠
+C_DONE    = "EF4444"   # 完成紅
 C_RUN     = "F59E0B"   # 執行中黃/橙
 C_PLAN    = "93C5FD"   # 規劃藍
 C_NOW     = "FF185F"   # 當前週粉紅（W4）
@@ -280,7 +280,7 @@ for (phase, task, typ, cost, bars) in ROWS:
 # ── 圖例（最後兩行）──────────────────────────────────────────────
 ws.row_dimensions[row].height = 14
 legend_items = [
-    (C_DONE, "已完成"),
+    (C_DONE, "已完成（紅）"),
     (C_NOW,  "當前週（W4，4/22）"),
     (C_RUN,  "執行中"),
     "93C5FD:規劃中",
