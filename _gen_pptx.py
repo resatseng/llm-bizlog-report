@@ -144,7 +144,7 @@ add_text(sl, "開發進度 & 成果簡報", 0.6, 2.6, 10, 0.8,
 divider(sl, 0.6, 3.35, 8, color=C_PINK)
 add_text(sl, "百萬篇業務日報 → 零人工 L1–L7 分類 → 法人標籤 → 三輸出邏輯",
          0.6, 3.55, 12, 0.6, size=14, color=C_GRAY)
-add_text(sl, "2026 年 4 月 23 日　　v4.7", 0.6, 6.0, 8, 0.4,
+add_text(sl, "2026 年 4 月 27 日　　v4.7", 0.6, 6.0, 8, 0.4,
          size=12, color=C_GRAY)
 
 # ══════════════════════════════════════════════════════════════
@@ -154,25 +154,26 @@ sl = prs.slides.add_slide(BLANK)
 slide_bg(sl, C_DARK)
 add_rect(sl, 0, 0, 13.33, 1.1, fill=RGBColor(0x0F,0x17,0x2A))
 add_text(sl, "整體進度總覽", 0.5, 0.15, 10, 0.8, size=26, bold=True, color=C_WHITE)
-badge(sl, "2026-04-23", 10.8, 0.2, w=2.0, fill=C_PINK)
+badge(sl, "2026-04-27", 10.8, 0.2, w=2.0, fill=C_PINK)
 
 phases = [
-    ("Phase 0",  "GCP 地基 + 問卷 Adapter",              "✅ 完成",  C_GREEN),
-    ("Phase L",  "Step 0/1/2/3 全完成 ✅  180萬筆",        "✅ 完成",  C_GREEN),
-    ("Phase 1",  "法人標籤 8大類  206,817 家 ✅",          "✅ 完成",  C_GREEN),
-    ("Phase M",  "分層聚類 + Map + 熱路徑  206,817 筆 ✅", "✅ 完成",  C_GREEN),
-    ("Phase 2",  "日報深度標籤（L1–L7）  執行中 6.8%",     "🔄 執行中", C_YELLOW),
+    ("Phase 0",  "GCP 地基 + 問卷 Adapter",              "✅ 完成",   C_GREEN),
+    ("Phase L",  "Step 0/1/2/3 全完成 ✅  180萬筆",        "✅ 完成",   C_GREEN),
+    ("Phase 1",  "法人標籤 8大類  206,817 家 ✅",          "✅ 完成",   C_GREEN),
+    ("Phase M",  "分層聚類 + REPORT.html 公開儀表板 ✅",   "✅ 完成",   C_GREEN),
+    ("商機等級", "三層 Pipeline  2.0%（KNN+TF-IDF）",      "🔄 執行中", C_YELLOW),
+    ("Phase 2",  "日報深度標籤（L1–L7）  40.5%",           "🔄 執行中", C_YELLOW),
     ("Phase 3",  "痛需累積表 + 三輸出",                   "⬜ 待建立", C_GRAY),
 ]
 for i, (ph, desc, status, sc) in enumerate(phases):
-    row = i // 3; col = i % 3
-    x = 0.4 + col * 4.3; y = 1.4 + row * 2.6
-    add_rect(sl, x, y, 4.0, 2.3, fill=RGBColor(0x1E,0x3A,0x52))
-    add_rect(sl, x, y, 4.0, 0.08, fill=sc)
-    add_text(sl, ph,   x+0.2, y+0.18, 3.6, 0.5, size=20, bold=True, color=C_WHITE)
-    add_text(sl, desc, x+0.2, y+0.65, 3.6, 0.9, size=12, color=C_LIGHT)
-    add_rect(sl, x+0.2, y+1.65, 1.6, 0.38, fill=sc)
-    add_text(sl, status, x+0.2, y+1.65, 1.6, 0.38, size=11, bold=True,
+    row = i // 4; col = i % 4
+    x = 0.25 + col * 3.2; y = 1.4 + row * 2.6
+    add_rect(sl, x, y, 3.0, 2.3, fill=RGBColor(0x1E,0x3A,0x52))
+    add_rect(sl, x, y, 3.0, 0.08, fill=sc)
+    add_text(sl, ph,   x+0.15, y+0.18, 2.7, 0.45, size=16, bold=True, color=C_WHITE)
+    add_text(sl, desc, x+0.15, y+0.65, 2.7, 0.9,  size=10, color=C_LIGHT)
+    add_rect(sl, x+0.15, y+1.65, 1.5, 0.38, fill=sc)
+    add_text(sl, status, x+0.15, y+1.65, 1.5, 0.38, size=10, bold=True,
              color=C_DARK if sc==C_YELLOW else C_WHITE, align=PP_ALIGN.CENTER)
 
 # ══════════════════════════════════════════════════════════════
@@ -611,7 +612,7 @@ add_text(sl,
 # 進度指標
 metric_box(sl, "已完成", "12,165", "家（RESUME）", 0.4, 1.82, w=3.0)
 metric_box(sl, "總目標", "178,790", "家", 3.6, 1.82, w=3.0)
-metric_box(sl, "進度", "6.8%", "持續執行中", 6.8, 1.82, w=3.0)
+metric_box(sl, "進度", "40.5%", "72,420 行 / ~178,790 行", 6.8, 1.82, w=3.0)
 metric_box(sl, "RPM 限制", "30", "6 Workers", 10.0, 1.82, w=3.0)
 
 # 各 L 層萃取欄位（中文 + 範例）
@@ -673,7 +674,7 @@ C_LINK = RGBColor(0x7D, 0xD3, 0xFC)
 
 nexts = [
     (C_YELLOW, "執行中",  "Phase 2 日報深度標籤",
-               "RESUME=True 持續執行中（6.8%）。完成後跑 E1→E2 輸出 CSV",
+               "RESUME=True 持續執行中（40.5%，72,420 行）。完成後跑 E1→E2 輸出 CSV",
                [("phase2_deep_labels.jsonl  (12,165筆)",  r"D:\yujui\痛點需求地圖\phase2_output\phase2_deep_labels.jsonl"),
                 ("phase2_labels_flat.csv",               r"D:\yujui\痛點需求地圖\phase2_output\phase2_labels_flat.csv")]),
     (C_PINK,   "完成後",  "Phase 3 痛需累積表",

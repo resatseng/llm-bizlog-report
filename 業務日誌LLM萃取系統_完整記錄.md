@@ -1,6 +1,6 @@
 # 業務日誌 LLM 智慧萃取系統 — 完整規劃與執行記錄
 
-> 版本 v4.6（+ Phase M/1 完成 + Phase 2 執行中 + 商機等級架構釐清）　2026 年 4 月（最後更新 2026-04-24）
+> 版本 v4.7（+ 商機等級 TF-IDF KNN Pipeline + Phase 2 40.5% + REPORT.html 公開儀表板）　2026 年 4 月（最後更新 2026-04-27）
 > 百萬篇日報 → 零人工 L 分類 → 分層聚類 → 商機等級（E/D/C2/C1/B/A）→ 痛需熱圖 → 三輸出邏輯
 
 ---
@@ -20,16 +20,16 @@
 | 累積決策層 | 法人歷程 × 痛需累積表，by 法人 × by L 層彙整 |
 | 行動輸出層 | ① 推方案/機會卡　② 推薦業務問項（空白議題）　③ 推薦開發方案卡 |
 
-### 1.2 現況盤點（v4.3）
+### 1.2 現況盤點（v4.7）
 
 | 模組 | 現況 | 成熟度 |
 |------|------|--------|
 | Phase 0 問卷 Adapter | ✅ 完成（survey_signals.jsonl 407 MB，survey_by_company.csv 5 MB，82,105 筆） | ✅ 完成 |
 | Phase L 零人工分類 pipeline | ✅ 完成（Step 0/1/2/3；phase_l_final.csv 1,802,590 筆） | ✅ 完成 |
 | Phase 1 法人歷程標籤 | ✅ 完成（206,817 家，8 大類屬性，company_labels_flat.csv） | ✅ 完成 |
-| Phase M 分層聚類 | ✅ 完成（KMeans k=7 + PCA + 熱路徑；7 種法人類型） | ✅ 完成 |
-| Phase 2 深度標籤 | 🔄 執行中 6.8%（L1–L7 全層，Gemini 2.0 Flash，6 Workers，RESUME=True） | 🔄 執行中 |
-| 商機等級（E/D/C2/C1/B/A） | 測試 1,000 筆 ✅；主流程待全量執行（756,989 筆 LeadInfo） | 🔄 待全量 |
+| Phase M 分層聚類 | ✅ 完成（KMeans k=7 + PCA + 熱路徑；REPORT.html 公開於 GitHub Pages） | ✅ 完成 |
+| Phase 2 深度標籤 | 🔄 執行中 40.5%（72,420 行，L1–L7 全層，RESUME=True） | 🔄 執行中 |
+| 商機等級（E/D/C2/C1/B/A） | 🔄 執行中 2.0%（15,000/756,989 筆；三層 pipeline：關鍵詞→TF-IDF KNN→Batch LLM） | 🔄 執行中 |
 | Phase 3 痛需熱圖 | 架構設計完成（Phase 2 × 商機等級 × PhaseM 聚類三維合併） | ⬜ 待建立 |
 
 ---
@@ -513,13 +513,13 @@ S1（匯入套件）→ S2（載入設定 & 連線）→ S3（初始化 Vertex A
 
 | 項目 | 說明 |
 |------|------|
-| 進度 | 🔄 6.8%（~12,159 家）|
-| 方法 | 每篇日報 × L1–L7 × 3 欄位，Gemini 2.0 Flash，6 Workers |
-| 輸出 | `results/phase2/phase2_deep_labels.jsonl` |
+| 進度 | 🔄 40.5%（72,420 行 / ~178,790 行） |
+| 方法 | 每篇日報 × L1–L7 × 3 欄位，Gemini 2.0 Flash，6 Workers，RESUME=True |
+| 輸出 | `phase2_output/phase2_deep_labels.jsonl` |
 
 ---
 
-### 商機等級（E/D/C2/C1/B/A）— 待全量執行
+### 商機等級（E/D/C2/C1/B/A）— 執行中
 
 **架構釐清（2026-04-24）：**
 - 商機等級 ≠ L1–L7；兩者是**不同維度**
@@ -528,10 +528,22 @@ S1（匯入套件）→ S2（載入設定 & 連線）→ S3（初始化 Vertex A
 
 **痛需熱圖 = L1–L7（Y 軸）× 商機等級（顏色溫度）× 法人類型（分群）**
 
+**三層 Pipeline（v4.7 升級，2026-04-26）：**
+
+| 層級 | 方法 | 覆蓋率（預估） | API 呼叫 |
+|------|------|-----------|---------|
+| Layer 1：關鍵詞快篩 | `_KW` dict（A/B/C1/C2/D/E） + `_NONE_KW`（排除詞） | ~70% | $0 |
+| Layer 2：TF-IDF KNN | `char_wb` 2-3 gram，30,000 特徵，k=5，信心 ≥ 0.65 | ~25% | $0 |
+| Layer 3：Batch LLM | 10 筆/次，Gemini 2.5 Flash，輸出「代碼｜原因」 | ~5% | 極低 |
+
+- KNN 種子庫：14,999 筆種子 → 7,122 筆訓練（每類最多 3,000 筆平衡抽樣）
+- KNN 模型路徑：`D:\yujui\痛點需求地圖\stage_knn_model.pkl`
+- 輸出欄位：`E/D/C2/C1/B/A`（bool）、`stage_group`（high/mid/low/none）、`top_stage`、`stage_reason`
+
 | 項目 | 說明 |
 |------|------|
 | 資料來源 | `CRMGY`（756,989 筆 LeadInfo） |
-| 現況 | 測試 1,000 筆 ✅；主流程 cell 已建立，待執行 |
+| 進度 | 🔄 2.0%（15,000/756,989 筆） |
 | 輸出 | `D:\yujui\痛點需求地圖\lead_stage_results.csv` |
 | 斷點續傳 | `lead_stage_progress.json` |
 

@@ -21,6 +21,10 @@
     │
     ├─ Phase M：分層聚類 + Map + 熱路徑
     │       └─ KMeans(k=7) × PCA × Top-30 熱路徑
+    │       └─ REPORT.html（互動式 PCA + 雷達圖，公開於 GitHub Pages）
+    │
+    ├─ 商機等級：LeadInfo E/D/C2/C1/B/A 銷售漏斗（執行中）
+    │       └─ 三層 pipeline：關鍵詞快篩 → TF-IDF KNN → Batch LLM
     │
     ├─ Phase 2：日報深度標籤（L1–L7 結構化，執行中）
     │       └─ phase2_deep_labels.jsonl
@@ -52,13 +56,15 @@
 | `法人標籤.ipynb` | Phase 1：法人歷程標籤（8 大類） |
 | `L-PhaseM分層聚類.ipynb` | Phase M：KMeans + PCA + 熱路徑 |
 | `L-Phase2深度標籤.ipynb` | Phase 2：L1–L7 深度結構化標籤 |
-| `商機等級.ipynb` | 商機評分輔助 |
+| `商機等級.ipynb` | 商機等級三層 pipeline（關鍵詞→TF-IDF KNN→Batch LLM） |
 
 ## 生成腳本
 
 | 檔案 | 說明 |
 |------|------|
 | `_gen_pptx.py` | 生成進度簡報 PPT |
+| `_gen_charts.py` | 生成 PCA 散點圖 + 雷達圖（PNG） |
+| `_gen_report3.py` | 生成互動式 REPORT.html（Plotly PCA + 雷達圖 Lightbox，PCA 群組篩選） |
 | `_gen_corp_label.py` | 生成法人標籤 Notebook |
 | `_gen_phaseM.py` | 生成 Phase M Notebook |
 | `_gen_phase2.py` | 生成 Phase 2 Notebook |
@@ -96,9 +102,9 @@ pwd = YOUR_PASSWORD
 | Phase 0 | ✅ 完成 | 82,105 筆問卷 | 三大信號（Pain/Need/Insight） |
 | Phase L | ✅ 完成 | 1,802,590 筆日報 | Step 0/1/2/3 零人工分類 |
 | Phase 1 | ✅ 完成 | 206,817 家法人 | 8 大類屬性標籤 |
-| Phase M | ✅ 完成 | 7 clusters | KMeans+PCA+熱路徑 |
-| 商機等級 | 🔄 待全量 | 756,989 筆 LeadInfo | E/D/C2/C1/B/A 銷售漏斗判定 |
-| Phase 2 | 🔄 執行中 6.8% | ~178,790 家 | L1–L7 全層深度標籤 |
+| Phase M | ✅ 完成 | 7 clusters | KMeans+PCA+熱路徑；REPORT.html 公開於 GitHub Pages |
+| 商機等級 | 🔄 執行中 2.0% | 756,989 筆 LeadInfo | 三層 pipeline：關鍵詞→TF-IDF KNN→Batch LLM（零 API 呼叫） |
+| Phase 2 | 🔄 執行中 40.5% | ~178,790 行 | L1–L7 全層深度標籤（72,420 行已完成） |
 | Phase 3 | ⬜ 待建立 | — | 痛需熱圖（Phase 2 × 商機等級 × PhaseM） |
 
 ## 架構關鍵釐清
@@ -112,5 +118,13 @@ pwd = YOUR_PASSWORD
 
 熱圖 = L1-L7（Y 軸）× 法人類型（X 軸），顏色深淺 = B+A 高階商機比例
 
+## 互動式儀表板
+
+REPORT.html 已公開於 GitHub Pages：https://resatseng.github.io/llm-bizlog-report/
+
+- PCA 散點圖：可依法人類型群組（C0–C6）篩選，支援全選 / 全消
+- 雷達圖：各群組 7 維特徵值，含單位（%、人、國、個）
+- Lightbox：點擊雷達縮圖可放大顯示
+
 ---
-*最後更新：2026-04-24*
+*最後更新：2026-04-27*
