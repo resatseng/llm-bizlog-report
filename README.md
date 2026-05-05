@@ -1,130 +1,165 @@
-# 業務日誌 LLM 智慧萃取系統
+# 痛點需求地圖 - 階段式分析流程
 
-百萬篇業務日報 → 零人工 L1–L7 分類 → 法人標籤 → 深度標籤 → 痛需地圖
-
-## 系統架構
+## 資料夾結構
 
 ```
-業務日報（SQL）
-    │
-    ├─ Phase 0：GCP 地基 + 問卷 Adapter
-    │       └─ survey_signals.jsonl（82,105 筆問卷三大信號）
-    │
-    ├─ Phase L：L1–L7 零人工分類（1,802,590 筆）
-    │       ├─ Step 0：LLM 標注種子庫（2,375 筆，KNN 正確率 73.67%）
-    │       ├─ Step 1：關鍵詞規則快篩（HIGH 867,023 筆）
-    │       ├─ Step 2：Embedding + KNN 分類（935,570 筆）
-    │       └─ Step 3：Self-Consistency LLM（14 筆模糊案例）
-    │
-    ├─ Phase 1：法人標籤（8 大類，206,817 家）
-    │       └─ company_labels.jsonl
-    │
-    ├─ Phase M：分層聚類 + Map + 熱路徑
-    │       └─ KMeans(k=7) × PCA × Top-30 熱路徑
-    │       └─ REPORT.html（互動式 PCA + 雷達圖，公開於 GitHub Pages）
-    │
-    ├─ 商機等級：LeadInfo E/D/C2/C1/B/A 銷售漏斗（執行中）
-    │       └─ 三層 pipeline：關鍵詞快篩 → TF-IDF KNN → Batch LLM
-    │
-    ├─ Phase 2：日報深度標籤（L1–L7 結構化，執行中）
-    │       └─ phase2_deep_labels.jsonl
-    │
-    └─ Phase 3：痛需累積表 + 三輸出（待建立）
+prompt定版/
+├── Phase1_法人屬性/         # 階段 1：法人基礎屬性萃取
+│   ├── results/
+│   │   └── company_labels_flat.csv
+│   └── README.md
+│
+├── Phase2_深度標籤/         # 階段 2：L1-L7 深度標籤萃取
+│   ├── L-Phase2深度標籤.ipynb
+│   ├── results/
+│   │   ├── phase2_deep_labels.jsonl (86MB, 173,376 家)
+│   │   └── phase2_labels_flat.csv
+│   └── README.md
+│
+├── Phase3_痛需熱圖/         # 階段 3：四路資料整合 + 熱圖生成
+│   ├── L-Phase3痛需熱圖.ipynb
+│   ├── results/
+│   │   ├── company_dim.csv
+│   │   ├── pain_heatmap.csv
+│   │   ├── pain_heatmap.png
+│   │   ├── output1_recommended_questions.csv
+│   │   ├── output2_development_cards.csv
+│   │   └── output3_opportunity_cards.csv
+│   └── README.md
+│
+├── Phase4_訂單整合分析/     # 階段 4：訂單驗證 + 時間序列路徑分析（v3）
+│   ├── L-Phase4訂單整合分析.ipynb
+│   ├── results_timeseries/
+│   │   ├── C1_stage_conversion_timeseries.csv
+│   │   ├── C2_cycle_distribution.csv
+│   │   ├── matched_orders.csv
+│   │   ├── stage_transitions.csv
+│   │   ├── company_stage_paths.csv
+│   │   ├── hot_stage_paths.csv
+│   │   ├── reverse_transitions.csv
+│   │   ├── single_vs_multi_stage.csv
+│   │   ├── order_conversion_paths.csv
+│   │   ├── hot_conversion_paths.csv
+│   │   ├── tree_path_analysis.csv
+│   │   ├── conversion_leaf_paths.csv
+│   │   ├── repurchase_dominated_paths.csv
+│   │   ├── new_customer_dominated_paths.csv
+│   │   ├── Phase4_Complete_Visualization_v3.png
+│   │   ├── Stage_Flow_Sankey.html
+│   │   └── Tree_Path_Sunburst.html
+│   └── README.md
+│
+└── PhaseM_聚類分析/         # 階段 M：法人分層聚類（C0-C6）
+    ├── L-PhaseM分層聚類.ipynb
+    ├── results/
+    │   ├── company_clusters.csv (18MB, 206,797 家)
+    │   ├── cluster_pca_map.png
+    │   ├── cluster_radar.png
+    │   └── radar_c0~c6.png
+    └── README.md
 ```
 
-## L 層定義
+## 執行順序
 
-| 層 | 名稱 | 萃取內容 |
-|----|------|----------|
-| L1 | 痛點層 | 痛點類型 / 衝擊程度 / 緊迫度 |
-| L2 | 角色層 | 決策角色 / 壓力來源 / 負責 KPI |
-| L3 | 目標層 | 目標類型 / 時程 / 核心 KPI |
-| L4 | 議題層 | 議題名稱 / 驅動因素 / 客戶立場 |
-| L5 | 評估層 | 評估項目 / 競爭者 / 決策標準 |
-| L6 | 方向層 | 策略方向 / 觸發事件 / 當前溫度 |
-| L7 | 成果層 | 結果類型 / 關鍵因素 / 下一步 |
+### 1️⃣ Phase 1：法人屬性標籤
+- **目的**：從業務日誌萃取 8 大基礎屬性
+- **輸出**：`company_labels_flat.csv` (178,790 家公司)
 
-## Notebooks 說明
+### 2️⃣ Phase M：聚類分析
+- **目的**：基於 Phase 1 屬性，聚類為 7 種法人類型
+- **輸入**：Phase 1 結果
+- **輸出**：`company_clusters.csv` (206,797 家公司)
+- **聚類**：C0 微型內銷、C1 標準內銷、C2 大型外商、C3 多面型強者、C4 品牌驅動、C5 家族外銷、C6 外資貿易
 
-| 檔案 | 說明 |
+### 3️⃣ Phase 2：深度標籤萃取
+- **目的**：使用 LLM 萃取 L1-L7 七層銷售情報
+- **輸入**：業務日誌（SQL Server）
+- **輸出**：`phase2_deep_labels.jsonl` (173,376 家公司)
+- **處理**：Gemini 2.5 Flash，28 小時批次處理
+- **覆蓋率**：L1 痛點 73.3%，123,893 家有效
+
+### 4️⃣ Phase 3：痛需熱圖
+- **目的**：四路資料整合，生成痛需熱圖與業務應用輸出
+- **輸入**：Phase 1 + Phase 2 + Phase M + 商機等級
+- **輸出**：
+  - 痛需熱圖（cluster × pain_type）
+  - Output 1：推薦業務問項（229 家）
+  - Output 2：開發方案卡（257 組合）
+  - Output 3：機會卡 B+A 標的（310 家）
+
+### 5️⃣ Phase 4：訂單整合分析 v3 ⭐ NEW
+- **目的**：時間序列路徑分析，追蹤商機階段演進與成交路徑
+- **輸入**：Phase 1-3 + 訂單資料（CRMHC 表）+ 業務日誌時間序列
+- **訂單規模**：73,934 筆（2024-2026）/ 14,842 家公司 / 總金額 167.6 億
+- **三大核心分析**：
+  - **階段轉換分析**：3,186 次轉換，識別正向晉升 vs 反向降級（A→C1 為再購）
+  - **成交路徑分析**：73,934 條完整旅程，標記單階段 vs 多階段轉換
+  - **樹狀路徑分析**：1,276 種獨特路徑，識別高再購路徑（≥70%）vs 新客路徑（≤30%）
+- **視覺化輸出**：
+  - 6 張整合圖表（週期分布、客戶分群、時間趨勢）
+  - Sankey 階段流向圖（互動式）
+  - Sunburst 樹狀路徑圖（互動式）
+
+## 資料流向
+
+```
+業務日誌 (SQL Server CRMGY)
+    ↓
+Phase 1 → 8 大屬性 ────────────┐
+    ↓                         ↓
+Phase M → 7 種聚類 ──┐    Phase 3 四路合流
+                     ↓         ↑
+Phase 2 → L1-L7 標籤 ─┴────────┤
+                               ↑
+商機等級 (lead_stage_results) ─┘
+                ↓
+    痛需熱圖 + 三輸出
+                ↓
+                │
+    ┌───────────┴──────────┐
+    ↓                      ↓
+Phase 4 五路整合     訂單資料 (CRMHC)
+    ↓
+階段轉換分析 + 成交路徑追蹤 + 樹狀路徑分群 + 互動式視覺化
+```
+
+## 關鍵指標
+
+| 指標 | 數值 |
 |------|------|
-| `L1L7種子庫建立.ipynb` | Phase L Step 0：LLM 標注 + KNN 種子庫 |
-| `L-Step1規則快篩.ipynb` | Phase L Step 1：關鍵詞規則快篩 |
-| `L-Step2KNN分類.ipynb` | Phase L Step 2：Embedding + KNN 分類 |
-| `L-Step3SC分類.ipynb` | Phase L Step 3：Self-Consistency LLM |
-| `L-問卷Adapter.ipynb` | Phase 0：問卷三大信號萃取 |
-| `法人標籤.ipynb` | Phase 1：法人歷程標籤（8 大類） |
-| `L-PhaseM分層聚類.ipynb` | Phase M：KMeans + PCA + 熱路徑 |
-| `L-Phase2深度標籤.ipynb` | Phase 2：L1–L7 深度結構化標籤 |
-| `商機等級.ipynb` | 商機等級三層 pipeline（關鍵詞→TF-IDF KNN→Batch LLM） |
+| 總公司數 | 206,817 家 |
+| Phase 2 處理成功 | 173,376 家 (84%) |
+| L1 痛點覆蓋 | 123,893 家 (73.3%) |
+| 商機等級覆蓋 | 2,085 家 |
+| B+A 高溫標的 | 310 家 |
+| 痛點組合數 | 89,710 個 |
+| 高熱組合 (≥0.5) | 257 個 |
+| **訂單筆數（2024-2026）** | **73,934 筆** |
+| **成交公司數** | **14,842 家** |
+| **總訂單金額** | **167.6 億元** |
+| **整體成交率** | **7.2%** |
+| **階段轉換次數** | **3,186 次** |
+| **獨特路徑數** | **1,276 條** |
+| **高再購路徑（≥70%）** | **63 條** |
+| **新客路徑（≤30%）** | **128 條** |
+| **Phase 4 輸出檔案** | **15 CSV + 3 圖表** |
 
-## 生成腳本
+## 技術棧
 
-| 檔案 | 說明 |
-|------|------|
-| `_gen_pptx.py` | 生成進度簡報 PPT |
-| `_gen_charts.py` | 生成 PCA 散點圖 + 雷達圖（PNG） |
-| `_gen_report3.py` | 生成互動式 REPORT.html（Plotly PCA + 雷達圖 Lightbox，PCA 群組篩選） |
-| `_gen_corp_label.py` | 生成法人標籤 Notebook |
-| `_gen_phaseM.py` | 生成 Phase M Notebook |
-| `_gen_phase2.py` | 生成 Phase 2 Notebook |
+- **LLM**: Google Gemini 2.5 Flash (Vertex AI)
+- **資料庫**: SQL Server (CRMGY 業務日誌表 + CRMHC 訂單表)
+- **分析**: Python, Pandas, NumPy, Scikit-learn
+- **視覺化**: Matplotlib, Plotly (Sankey, Sunburst)
+- **平行處理**: ThreadPoolExecutor, RateLimiter
 
-## 環境需求
+## 更新日誌
 
-```bash
-pip install google-genai pyodbc pandas tqdm scikit-learn numpy
-```
-
-- Python 3.10+
-- Gemini API Key（`D:\yujui\GoogleCloud.ini`）
-- SQL Server 連線（`D:\yujui\SqlServer18.txt`）
-
-## 設定檔格式
-
-**GoogleCloud.ini**
-```ini
-[gcp]
-gemini_api_key = YOUR_API_KEY
-```
-
-**SqlServer18.txt**
-```ini
-[mssql]
-server = YOUR_SERVER_IP
-uid = YOUR_USERNAME
-pwd = YOUR_PASSWORD
-```
-
-## 進度
-
-| Phase | 狀態 | 數量 | 說明 |
-|-------|------|------|------|
-| Phase 0 | ✅ 完成 | 82,105 筆問卷 | 三大信號（Pain/Need/Insight） |
-| Phase L | ✅ 完成 | 1,802,590 筆日報 | Step 0/1/2/3 零人工分類 |
-| Phase 1 | ✅ 完成 | 206,817 家法人 | 8 大類屬性標籤 |
-| Phase M | ✅ 完成 | 7 clusters | KMeans+PCA+熱路徑；REPORT.html 公開於 GitHub Pages |
-| 商機等級 | 🔄 執行中 2.0% | 756,989 筆 LeadInfo | 三層 pipeline：關鍵詞→TF-IDF KNN→Batch LLM（零 API 呼叫） |
-| Phase 2 | 🔄 執行中 40.5% | ~178,790 行 | L1–L7 全層深度標籤（72,420 行已完成） |
-| Phase 3 | ⬜ 待建立 | — | 痛需熱圖（Phase 2 × 商機等級 × PhaseM） |
-
-## 架構關鍵釐清
-
-痛需熱圖由**兩個獨立維度**合成：
-
-| 維度 | 工具 | 回答的問題 |
-|------|------|-----------|
-| L1–L7 | Phase 2 深度標籤 | 客戶在**討論什麼**（痛點/角色/目標…） |
-| 商機等級 | 商機等級.ipynb | 這筆 Lead **走到哪一步**（E→D→C2→C1→B→A） |
-
-熱圖 = L1-L7（Y 軸）× 法人類型（X 軸），顏色深淺 = B+A 高階商機比例
-
-## 互動式儀表板
-
-REPORT.html 已公開於 GitHub Pages：https://resatseng.github.io/llm-bizlog-report/
-
-- PCA 散點圖：可依法人類型群組（C0–C6）篩選，支援全選 / 全消
-- 雷達圖：各群組 7 維特徵值，含單位（%、人、國、個）
-- Lightbox：點擊雷達縮圖可放大顯示
-
----
-*最後更新：2026-04-27*
+- 2026-05-05：
+  - Phase 4 v3 時間序列路徑分析完成（階段轉換、成交路徑、樹狀路徑分析）
+  - 新增互動式視覺化（Sankey 階段流向圖、Sunburst 樹狀路徑圖）
+  - 識別 1,276 條獨特路徑，標記高再購路徑（63 條）與新客路徑（128 條）
+  - 完整輸出：15 CSV 檔案 + 3 圖表（靜態 + 互動式）
+  - 整合 CRMHC 訂單資料（73,934 筆 / 167.6 億元）
+- 2026-05-04：Phase 2 完成（173,376 家）
+- 2026-04-30：修正商機等級 ID 格式對齊
+- 2026-04-23：Phase M 聚類完成（7 clusters）
