@@ -27,6 +27,9 @@ company_labels.jsonl
 seed_vectors.jsonl
 survey_signals.jsonl
 survey_labeled.jsonl
+phase2_deep_labels.jsonl
+phase2_deep_labels_backup*.jsonl
+phase2_labels_flat.csv
 
 # Python
 __pycache__/
