@@ -421,14 +421,14 @@ parts.append("""
 <div class="section" id="results">
   <h2>結果一覽</h2>
   <table>
-    <tr><th>Phase</th><th>狀態</th><th>數量</th><th>結果檔案</th></tr>
-    <tr><td>Phase 0</td><td style="color:#10b981">✅ 完成</td><td>82,105 筆</td><td><code>results/phase0/survey_by_company.csv</code></td></tr>
-    <tr><td>Phase L</td><td style="color:#10b981">✅ 完成</td><td>1,802,590 筆</td><td><code>results/phaseL/</code>（4 檔）</td></tr>
-    <tr><td>Phase 1</td><td style="color:#10b981">✅ 完成</td><td>206,817 家</td><td><code>results/phase1/company_labels_flat.csv</code></td></tr>
-    <tr><td>Phase M</td><td style="color:#10b981">✅ 完成</td><td>7 clusters</td><td><code>results/phaseM/</code>（PCA + 7 雷達 + CSV）</td></tr>
-    <tr><td>商機等級</td><td style="color:#f59e0b">🔄 執行中</td><td>15,000 / 756,989（2.0%）</td><td><code>lead_stage_results.csv</code>（關鍵詞→TF-IDF KNN→Batch LLM）</td></tr>
-    <tr><td>Phase 2</td><td style="color:#f59e0b">🔄 執行中</td><td>72,420 / ~178,790（40.5%）</td><td><code>phase2_output/phase2_deep_labels.jsonl</code></td></tr>
-    <tr><td>Phase 3</td><td style="color:#64748b">⬜ 待建立</td><td>—</td><td><code>L-Phase3痛需熱圖.ipynb</code>（schema 已設計）</td></tr>
+    <tr><th>Phase</th><th>階段中文名稱</th><th>數量</th><th>結果檔案</th></tr>
+    <tr><td>Phase 0</td><td style="color:#10b981">問卷 Adapter</td><td>82,105 筆</td><td><code>results/phase0/survey_by_company.csv</code></td></tr>
+    <tr><td>Phase L</td><td style="color:#10b981">L1–L7 零人工分類</td><td>1,802,590 筆</td><td><code>results/phaseL/</code>（4 檔）</td></tr>
+    <tr><td>Phase 1</td><td style="color:#10b981">法人標籤</td><td>206,817 家</td><td><code>results/phase1/company_labels_flat.csv</code></td></tr>
+    <tr><td>Phase M</td><td style="color:#10b981">分層聚類 + 痛需地圖</td><td>7 clusters</td><td><code>results/phaseM/</code>（PCA + 7 雷達 + CSV）</td></tr>
+    <tr><td>商機等級</td><td style="color:#f59e0b">LeadInfo 銷售漏斗</td><td>15,000 / 756,989（2.0%）</td><td><code>lead_stage_results.csv</code>（關鍵詞→TF-IDF KNN→Batch LLM）</td></tr>
+    <tr><td>Phase 2</td><td style="color:#f59e0b">日報深度標籤</td><td>72,420 / ~178,790（40.5%）</td><td><code>phase2_output/phase2_deep_labels.jsonl</code></td></tr>
+    <tr><td>Phase 3</td><td style="color:#64748b">痛需熱圖 + 三輸出</td><td>—</td><td><code>L-Phase3痛需熱圖.ipynb</code>（schema 已設計）</td></tr>
   </table>
 </div>
 <footer>
