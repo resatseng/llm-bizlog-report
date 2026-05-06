@@ -46,7 +46,12 @@ fig.add_trace(
         name='訂單數',
         marker_color='#2196F3',
         opacity=0.7,
-        hovertemplate='<b>%{x}</b><br>訂單數: %{y}<extra></extra>'
+        hovertemplate='<b>%{x}</b><br>訂單數: %{y}<extra></extra>',
+        hoverlabel=dict(
+            bgcolor='#2196F3',
+            font_size=14,
+            font_family='Microsoft JhengHei'
+        )
     ),
     secondary_y=False
 )
@@ -60,11 +65,17 @@ fig.add_trace(
         mode='lines+markers',
         line=dict(color='#FF5722', width=3),
         marker=dict(
-            size=10,
+            size=12,
             color='#FF5722',
-            line=dict(color='white', width=2)
+            line=dict(color='white', width=2),
+            symbol='circle'
         ),
-        hovertemplate='<b>%{x}</b><br>平均成交週期: %{y:.1f} 天<extra></extra>'
+        hovertemplate='<b>%{x}</b><br>平均成交週期: %{y:.1f} 天<extra></extra>',
+        hoverlabel=dict(
+            bgcolor='#FF5722',
+            font_size=14,
+            font_family='Microsoft JhengHei'
+        )
     ),
     secondary_y=True
 )
@@ -108,7 +119,9 @@ fig.update_layout(
         xanchor="right",
         x=1
     ),
-    font=dict(family='Microsoft JhengHei', size=12)
+    font=dict(family='Microsoft JhengHei', size=12),
+    hoverdistance=100,  # 增加 hover 觸發距離
+    spikedistance=1000  # 增加 spike 線顯示範圍
 )
 
 # 儲存互動式 HTML
