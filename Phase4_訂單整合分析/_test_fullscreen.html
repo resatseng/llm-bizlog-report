@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>測試全螢幕 Plotly</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #myDiv {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="myDiv"></div>
+
+    <script>
+        var data = [{
+            type: "sunburst",
+            labels: ["總訂單", "A", "B", "C", "D", "E", "A1", "A2", "B1", "B2"],
+            parents: ["", "總訂單", "總訂單", "總訂單", "總訂單", "總訂單", "A", "A", "B", "B"],
+            values: [100, 20, 25, 15, 10, 30, 10, 10, 15, 10],
+            branchvalues: "total",
+            marker: {
+                colors: ['#f0f0f0', '#e74c3c', '#3498db', '#f39c12', '#9b59b6', '#2ecc71', '#e74c3c', '#e74c3c', '#3498db', '#3498db'],
+                line: {color: 'white', width: 2}
+            },
+            hoverinfo: 'text',
+            text: ['總訂單: 100', 'A: 20', 'B: 25', 'C: 15', 'D: 10', 'E: 30', 'A1: 10', 'A2: 10', 'B1: 15', 'B2: 10']
+        }];
+
+        var layout = {
+            title: {
+                text: '測試全螢幕 Sunburst 圖表',
+                font: {size: 20}
+            },
+            // 不設定 width 和 height，讓它自適應
+            margin: {l: 0, r: 0, t: 60, b: 0},
+            autosize: true
+        };
+
+        var config = {
+            responsive: true,
+            displayModeBar: true
+        };
+
+        Plotly.newPlot('myDiv', data, layout, config);
+
+        console.log('Plotly 圖表已渲染');
+
+        // 強制調整大小
+        window.addEventListener('resize', function() {
+            Plotly.Plots.resize('myDiv');
+        });
+    </script>
+</body>
+</html>
