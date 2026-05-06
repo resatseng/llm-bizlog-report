@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>測試 Plotly Sunburst</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+    <div id="myDiv" style="width:900px; height:800px;"></div>
+
+    <script>
+        var data = [{
+            type: "sunburst",
+            labels: ["總訂單", "A", "B", "C", "A1", "A2", "B1", "B2"],
+            parents: ["", "總訂單", "總訂單", "總訂單", "A", "A", "B", "B"],
+            values: [100, 30, 40, 30, 15, 15, 20, 20],
+            branchvalues: "total"
+        }];
+
+        var layout = {
+            title: "測試 Sunburst 圖表",
+            width: 900,
+            height: 800
+        };
+
+        var config = {responsive: true};
+
+        Plotly.newPlot('myDiv', data, layout, config);
+
+        console.log('Plotly 圖表已渲染');
+    </script>
+
+    <script id="wheel-zoom-handler">
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                let scale = 1;
+
+                document.addEventListener('wheel', function(e) {
+                    e.preventDefault();
+
+                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                    scale = Math.max(0.5, Math.min(8, scale + delta));
+
+                    document.body.style.transform = `scale(${scale})`;
+                    document.body.style.transformOrigin = 'top left';
+
+                    let tip = document.getElementById('zoom-tip');
+                    if (!tip) {
+                        tip = document.createElement('div');
+                        tip.id = 'zoom-tip';
+                        tip.style.cssText = 'position:fixed; top:10px; right:10px; background:#4CAF50; color:white; padding:10px 20px; border-radius:8px; font-size:16px; z-index:999999; font-family:Arial;';
+                        document.body.appendChild(tip);
+                    }
+                    tip.textContent = Math.round(scale * 100) + '%';
+                    tip.style.opacity = '1';
+
+                    clearTimeout(tip.timer);
+                    tip.timer = setTimeout(() => tip.style.opacity = '0', 1000);
+                }, {passive: false});
+
+                console.log('縮放已啟用');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
