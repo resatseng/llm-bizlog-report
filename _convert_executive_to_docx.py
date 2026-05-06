@@ -1,0 +1,206 @@
+"""
+將推薦系統規劃_主管版.md 轉換為 Word 文檔
+"""
+import re
+from docx import Document
+from docx.shared import Pt, Inches, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_PARAGRAPH_ALIGNMENT
+from docx.oxml.ns import qn
+from pathlib import Path
+
+def parse_table(lines):
+    """解析 Markdown 表格"""
+    if not lines or len(lines) < 2:
+        return None
+
+    # 移除分隔線
+    table_lines = [line for line in lines if not re.match(r'^\|[\s\-:]+\|$', line)]
+
+    if len(table_lines) < 2:
+        return None
+
+    # 解析表頭和數據
+    rows = []
+    for line in table_lines:
+        cells = [cell.strip() for cell in line.split('|')[1:-1]]
+        rows.append(cells)
+
+    return rows
+
+def add_table_to_doc(doc, table_data):
+    """添加表格到文檔"""
+    if not table_data:
+        return
+
+    table = doc.add_table(rows=len(table_data), cols=len(table_data[0]))
+    table.style = 'Light Grid Accent 1'
+
+    for i, row_data in enumerate(table_data):
+        row = table.rows[i]
+        for j, cell_data in enumerate(row_data):
+            cell = row.cells[j]
+            cell.text = cell_data
+
+            # 表頭加粗並置中
+            if i == 0:
+                for paragraph in cell.paragraphs:
+                    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                    for run in paragraph.runs:
+                        run.font.bold = True
+                        run.font.size = Pt(10)
+            else:
+                # 數據行
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(10)
+
+def convert_md_to_docx(input_file, output_file):
+    """轉換 Markdown 為 Word 文檔"""
+    doc = Document()
+
+    # 設定中文字體
+    doc.styles['Normal'].font.name = '微軟正黑體'
+    doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), '微軟正黑體')
+    doc.styles['Normal'].font.size = Pt(11)
+
+    # 設定標題樣式
+    for i in range(1, 4):
+        style = doc.styles[f'Heading {i}']
+        style.font.name = '微軟正黑體'
+        style._element.rPr.rFonts.set(qn('w:eastAsia'), '微軟正黑體')
+        style.font.color.rgb = RGBColor(0, 70, 140)
+
+    with open(input_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    i = 0
+    in_code_block = False
+    code_lines = []
+    in_table = False
+    table_lines = []
+
+    while i < len(lines):
+        line = lines[i].rstrip()
+
+        # 處理代碼塊（ASCII 圖表）
+        if line.startswith('```'):
+            if in_code_block:
+                # 結束代碼塊
+                code_text = '\n'.join(code_lines)
+                p = doc.add_paragraph(code_text)
+                p.style = 'No Spacing'
+                for run in p.runs:
+                    run.font.name = 'Consolas'
+                    run.font.size = Pt(8)
+                    run.font.color.rgb = RGBColor(60, 60, 60)
+                code_lines = []
+                in_code_block = False
+            else:
+                # 開始代碼塊
+                in_code_block = True
+            i += 1
+            continue
+
+        if in_code_block:
+            code_lines.append(line)
+            i += 1
+            continue
+
+        # 處理表格
+        if line.startswith('|') and '|' in line[1:]:
+            if not in_table:
+                in_table = True
+                table_lines = []
+            table_lines.append(line)
+            i += 1
+            # 檢查下一行是否還是表格
+            if i < len(lines) and not lines[i].strip().startswith('|'):
+                # 表格結束
+                table_data = parse_table(table_lines)
+                if table_data:
+                    add_table_to_doc(doc, table_data)
+                    doc.add_paragraph()  # 空行
+                in_table = False
+                table_lines = []
+            continue
+
+        # 空行
+        if not line.strip():
+            if not in_table:
+                doc.add_paragraph()
+            i += 1
+            continue
+
+        # 分隔線
+        if line.strip() == '---':
+            doc.add_paragraph()
+            i += 1
+            continue
+
+        # 標題
+        if line.startswith('#'):
+            level = len(re.match(r'^#+', line).group())
+            title_text = line.lstrip('#').strip()
+
+            heading = doc.add_heading(title_text, level=level)
+            heading.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            i += 1
+            continue
+
+        # 列表
+        if line.strip().startswith(('-', '*')):
+            list_text = re.sub(r'^[\-\*]\s*', '', line.strip())
+            # 處理粗體
+            list_text = re.sub(r'\*\*(.*?)\*\*', r'\1', list_text)
+
+            p = doc.add_paragraph(list_text, style='List Bullet')
+            i += 1
+            continue
+
+        # 數字列表
+        if re.match(r'^\d+\.', line.strip()):
+            list_text = re.sub(r'^\d+\.\s*', '', line.strip())
+            # 處理粗體
+            list_text = re.sub(r'\*\*(.*?)\*\*', r'\1', list_text)
+
+            p = doc.add_paragraph(list_text, style='List Number')
+            i += 1
+            continue
+
+        # 一般段落
+        text = line.strip()
+
+        # 處理粗體（**文字**）
+        p = doc.add_paragraph()
+        parts = re.split(r'(\*\*.*?\*\*)', text)
+
+        for part in parts:
+            if part.startswith('**') and part.endswith('**'):
+                run = p.add_run(part[2:-2])
+                run.font.bold = True
+            else:
+                # 移除內聯代碼標記
+                part = re.sub(r'`([^`]+)`', r'\1', part)
+                p.add_run(part)
+
+        i += 1
+
+    # 保存文檔
+    doc.save(output_file)
+    print(f"[OK] 成功轉換：{output_file}")
+    print(f"  文檔類型：主管報告版")
+    print(f"  版本：v2.1")
+
+if __name__ == "__main__":
+    input_file = Path(r"d:\yujui\痛點需求地圖\prompt定版\推薦系統規劃_主管版.md")
+    output_file = Path(r"d:\yujui\痛點需求地圖\prompt定版\推薦系統規劃.docx")
+
+    print("開始轉換主管版 Markdown 為 Word 文檔...")
+    print(f"來源檔案：{input_file}")
+    print(f"目標檔案：{output_file}")
+    print("-" * 80)
+
+    convert_md_to_docx(input_file, output_file)
+
+    print("-" * 80)
+    print(f"檔案大小：{output_file.stat().st_size / 1024:.1f} KB")
