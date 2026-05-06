@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>測試滾輪縮放</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+        }
+        #test-div {
+            width: 600px;
+            height: 600px;
+            background: white;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="test-div">
+        在這裡滾動滑鼠滾輪測試
+    </div>
+
+    <script>
+    window.addEventListener('load', function() {
+        const testDiv = document.getElementById('test-div');
+        let scale = 1;
+        const MIN_SCALE = 0.3;
+        const MAX_SCALE = 5;
+        const SCALE_STEP = 0.15;
+
+        testDiv.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const delta = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP;
+            scale = Math.min(Math.max(scale + delta, MIN_SCALE), MAX_SCALE);
+
+            testDiv.style.transform = `scale(${scale})`;
+            testDiv.style.transformOrigin = 'center center';
+            testDiv.style.transition = 'transform 0.1s ease-out';
+
+            testDiv.textContent = `縮放: ${Math.round(scale * 100)}%`;
+
+            console.log('縮放:', Math.round(scale * 100) + '%');
+        }, { passive: false });
+
+        testDiv.addEventListener('dblclick', function() {
+            scale = 1;
+            testDiv.style.transform = 'scale(1)';
+            testDiv.textContent = '在這裡滾動滑鼠滾輪測試';
+        });
+
+        console.log('測試頁面已載入');
+    });
+    </script>
+</body>
+</html>
