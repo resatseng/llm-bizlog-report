@@ -146,14 +146,11 @@ plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 for i in range(len(heatmap_pivot.index)):
     for j in range(len(heatmap_pivot.columns)):
         value = heatmap_pivot.values[i, j]
-        # 所有数字统一使用白色，加黑色描边以确保在浅色背景上可见
+        # 所有数字统一使用黑色
         text = ax.text(j, i, f'{value:.2f}',
                       ha="center", va="center",
-                      color='white',
-                      fontsize=10, fontweight='bold',
-                      path_effects=[
-                          matplotlib.patheffects.withStroke(linewidth=2, foreground='black')
-                      ])
+                      color='black',
+                      fontsize=10, fontweight='bold')
 
 ax.set_title('痛需熱圖：法人類型 × 痛點類別（12類別）\n熱度分數（heat_score）',
              fontsize=16, fontweight='bold', pad=20, color='#7dd3fc')
