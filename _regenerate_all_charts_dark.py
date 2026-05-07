@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.patheffects
 matplotlib.rcParams['font.sans-serif'] = ['Microsoft JhengHei', 'Arial Unicode MS']
 matplotlib.rcParams['axes.unicode_minus'] = False
 
@@ -145,18 +146,14 @@ plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 for i in range(len(heatmap_pivot.index)):
     for j in range(len(heatmap_pivot.columns)):
         value = heatmap_pivot.values[i, j]
-        # 所有格子都显示数字，根据背景色调整文字颜色
-        if value >= 0.2:
-            text_color = 'white'  # 深红色背景用白字
-        elif value >= 0.05:
-            text_color = '#1a1f2e'  # 橙黄色背景用深色字
-        else:
-            text_color = '#4a5568'  # 浅黄色/白色背景用灰色字
-
+        # 所有数字统一使用白色，加黑色描边以确保在浅色背景上可见
         text = ax.text(j, i, f'{value:.2f}',
                       ha="center", va="center",
-                      color=text_color,
-                      fontsize=10, fontweight='bold')
+                      color='white',
+                      fontsize=10, fontweight='bold',
+                      path_effects=[
+                          matplotlib.patheffects.withStroke(linewidth=2, foreground='black')
+                      ])
 
 ax.set_title('痛需熱圖：法人類型 × 痛點類別（12類別）\n熱度分數（heat_score）',
              fontsize=16, fontweight='bold', pad=20, color='#7dd3fc')
