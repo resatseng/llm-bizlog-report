@@ -1,0 +1,5 @@
+# 排除包含敏感資訊的原始資料檔案
+pain_records_*.csv
+pain_heatmap_final.csv
+
+# 只提交統計和視覺化結果

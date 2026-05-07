@@ -1,0 +1,13 @@
+﻿category_id,category_name,count
+COMM,溝通聯繫障礙,31276
+SYSTEM,現有系統相關,27027
+DEMAND,需求不明確/不符,26492
+BUDGET,預算資源限制,11959
+TECH,技術系統問題,6806
+CUSTOMER_ATTITUDE,客戶態度消極,4959
+INFO,資訊不足/不透明,4557
+PROCESS,流程效率問題,4390
+COMPANY_STATUS,公司狀態異常,2433
+ERP,ERP系統相關,1754
+SECURITY,資安合規問題,1218
+SERVICE,服務品質問題,1022
