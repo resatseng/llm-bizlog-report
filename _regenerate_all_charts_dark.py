@@ -145,11 +145,18 @@ plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 for i in range(len(heatmap_pivot.index)):
     for j in range(len(heatmap_pivot.columns)):
         value = heatmap_pivot.values[i, j]
-        if value > 0:
-            text = ax.text(j, i, f'{value:.2f}',
-                          ha="center", va="center",
-                          color='white' if value > 0.5 else '#1a1f2e',
-                          fontsize=10, fontweight='bold')
+        # 所有格子都显示数字
+        if value > 0.25:
+            text_color = 'white'
+        elif value > 0.1:
+            text_color = '#1a1f2e'
+        else:
+            text_color = '#0f1117'  # 极小值用深色
+
+        text = ax.text(j, i, f'{value:.2f}',
+                      ha="center", va="center",
+                      color=text_color,
+                      fontsize=10, fontweight='bold')
 
 ax.set_title('痛需熱圖：法人類型 × 痛點類別（12類別）\n熱度分數（heat_score）',
              fontsize=16, fontweight='bold', pad=20, color='#7dd3fc')
