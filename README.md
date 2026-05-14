@@ -152,8 +152,29 @@ Phase 4 五路整合     訂單資料 (CRMHC)
 - **視覺化**: Matplotlib, Plotly (Sankey, Sunburst)
 - **平行處理**: ThreadPoolExecutor, RateLimiter
 
+## 🌐 線上展示（GitHub Pages）
+
+### 📄 技術文件
+**URL**: https://resatseng.github.io/llm-bizlog-report/
+
+完整的業務日誌 LLM 智慧萃取系統技術文件，包含系統架構、實作細節、效能分析等。
+
+### 🏗️ 系統架構圖集
+**URL**: https://resatseng.github.io/llm-bizlog-report/architecture.html
+
+痛點需求地圖系統的完整架構視覺化，包含：
+- 總體系統架構圖
+- 資料流程與四路整合
+- Phase 1-4 執行流程
+- 技術架構與資料庫設計
+- 互動式 Mermaid.js 圖表
+
+---
+
 ## 更新日誌
 
+- 2026-05-14：新增系統架構圖集頁面（architecture.html）
+- 2026-05-13：修正 Phase 4 圖表黑底配色
 - 2026-05-05：
   - Phase 4 v3 時間序列路徑分析完成（階段轉換、成交路徑、樹狀路徑分析）
   - 新增互動式視覺化（Sankey 階段流向圖、Sunburst 樹狀路徑圖）
