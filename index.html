@@ -133,8 +133,8 @@ footer{text-align:center;padding:36px;color:#475569;font-size:.83em;border-top:1
     <span class="badge green">4,060,551 筆日報已彙整</span>
     <span class="badge green">304,289 家法人已標籤</span>
     <span class="badge blue">7 群聚類已完成</span>
-    <span class="badge yellow">Phase 2 執行中 40.5%</span>
-    <span class="badge yellow">商機等級執行中 2.0%</span>
+    <span class="badge green">Phase 2 已完成（273,902 家）</span>
+    <span class="badge green">商機等級已完成</span>
     <span class="badge">Gemini 2.0 Flash</span>
     <span class="badge">sklearn KMeans + PCA</span>
     <span class="badge green">日報彙整分析系統（新）每日自動增量更新</span>
@@ -413,12 +413,12 @@ TEMP = <span class="nm">0.1</span>  |  RPM_LIMIT = <span class="nm">30</span></c
 </div>
 
 <div class="section" id="phase2">
-  <h2>Phase 2 — 日報深度標籤（173,376 家）</h2>
+  <h2>Phase 2 — 日報深度標籤（273,902 家）</h2>
   <div class="stats-grid">
-    <div class="stat-box"><div class="stat-num">40.5%</div><div class="stat-label">當前進度</div></div>
-    <div class="stat-box"><div class="stat-num">72,420</div><div class="stat-label">已完成行數</div></div>
+    <div class="stat-box"><div class="stat-num">已完成</div><div class="stat-label">當前進度</div></div>
+    <div class="stat-box"><div class="stat-num">273,902</div><div class="stat-label">已完成行數</div></div>
     <div class="stat-box"><div class="stat-num">6</div><div class="stat-label">並發 Workers</div></div>
-    <div class="stat-box"><div class="stat-num">~178,790</div><div class="stat-label">目標行數</div></div>
+    <div class="stat-box"><div class="stat-num">304,289</div><div class="stat-label">目前總公司數</div></div>
   </div>
   <pre><code>RPM_LIMIT = <span class="nm">30</span>  |  N_WORKERS = <span class="nm">6</span>  |  RESUME = <span class="nm">True</span>
 
@@ -603,8 +603,8 @@ TEMP = <span class="nm">0.1</span>  |  RPM_LIMIT = <span class="nm">30</span></c
     <tr><td>Phase L</td><td style="color:#10b981">L1–L7 零人工分類</td><td>1,802,590 筆</td><td><code>results/phaseL/</code>（4 檔）</td></tr>
     <tr><td>Phase 1</td><td style="color:#10b981">法人標籤</td><td>178,790 家</td><td><code>Phase1_法人屬性/results/company_labels_flat.csv</code></td></tr>
     <tr><td>Phase M</td><td style="color:#10b981">分層聚類 + 痛需地圖</td><td>206,797 家 / 7 clusters</td><td><code>PhaseM_聚類分析/results/</code>（PCA + 雷達圖 + CSV）</td></tr>
-    <tr><td>商機等級</td><td style="color:#10b981">LeadInfo 銷售漏斗</td><td>2,085 家</td><td><code>商機等級.ipynb</code>（關鍵詞→TF-IDF KNN→Batch LLM）</td></tr>
-    <tr><td>Phase 2</td><td style="color:#10b981">日報深度標籤</td><td>173,376 家（84%）</td><td><code>Phase2_深度標籤/results/phase2_deep_labels.jsonl</code>（86MB）</td></tr>
+    <tr><td>商機等級</td><td style="color:#10b981">LeadInfo 銷售漏斗</td><td>4,240,000 筆（已完成）</td><td><code>商機等級.ipynb</code>（關鍵詞→TF-IDF KNN→Batch LLM）</td></tr>
+    <tr><td>Phase 2</td><td style="color:#10b981">日報深度標籤</td><td>273,902 家（已完成）</td><td><code>Phase2_深度標籤/results/phase2_deep_labels.jsonl</code>（86MB）</td></tr>
     <tr><td>Phase 3</td><td style="color:#10b981">痛需熱圖 + 三輸出</td><td>3 輸出（229+257+310）</td><td><code>Phase3_痛需熱圖/results/</code>（熱圖 + 推薦問項 + 開發卡 + 機會卡）</td></tr>
     <tr><td>Phase 4</td><td style="color:#10b981">訂單整合分析</td><td>73,934 筆 / 167.6 億</td><td><code>Phase4_訂單整合分析/results_timeseries/</code>（15 CSV + 3 圖表）</td></tr>
     <tr><td>日報彙整（新）</td><td style="color:#10b981">業務日報彙整分析系統</td><td>406萬筆日誌 / 約30萬家公司 / 249萬筆月度整合</td><td><a href="日報彙整分析系統_最終報告.md" style="color:#7dd3fc">日報彙整分析系統_最終報告.md</a></td></tr>
